@@ -1,4 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import { serve } from "inngest/next";
+// rest of your code
 import { inngest, syncUserCreation, syncUserDeletion, syncUserUpdation } from "@/config/inngest";
 
 
