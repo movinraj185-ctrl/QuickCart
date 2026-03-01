@@ -57,4 +57,3 @@ export async function PUT(req, res) {
   const h = await getHandler();
   return h.PUT(req, res);
 }
-
