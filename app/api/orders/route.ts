@@ -3,19 +3,13 @@ import Order from "@/models/order";
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// initialize database connection once
-try {
-  connectDB();
-} catch (e) {
-  console.error("DB initial connect failed", e);
-}
-
 export async function POST(req: Request) {
   const user = await currentUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
 
-  const body = await req.json();
   try {
+    await connectDB();
+    const body = await req.json();
     const order = await Order.create({ ...body, user: user.id });
     return NextResponse.json(order);
   } catch (error) {
@@ -29,6 +23,7 @@ export async function GET(req: Request) {
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
+    await connectDB();
     // @ts-ignore
     const orders = await Order.find({ user: user.id }).sort({ date: -1 });
     return NextResponse.json(orders);
