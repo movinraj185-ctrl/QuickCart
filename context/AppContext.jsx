@@ -19,15 +19,17 @@ export const AppContextProvider = (props) => {
 
     const [products, setProducts] = useState([])
     const [userData, setUserData] = useState(false)
-    const [isSeller, setIsSeller] = useState(true)
+    const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
+    const [userAddresses, setUserAddresses] = useState([])
 
     const fetchProductData = async () => {
         setProducts(productsDummyData)
     }
 
     const fetchUserData = async () => {
-        setUserData(userDummyData)
+
+       
     }
 
     const addToCart = async (itemId) => {
@@ -81,8 +83,12 @@ export const AppContextProvider = (props) => {
     }, [])
 
     useEffect(() => {
-        fetchUserData()
-    }, [])
+        if (user) {
+            fetchUserData();
+        }
+    }, [user])
+
+    const addUserAddress = (addr) => setUserAddresses(prev => [...prev, addr]);
 
     const value = {
         user,
@@ -92,7 +98,8 @@ export const AppContextProvider = (props) => {
         products, fetchProductData,
         cartItems, setCartItems,
         addToCart, updateCartQuantity,
-        getCartCount, getCartAmount
+        getCartCount, getCartAmount,
+        userAddresses, addUserAddress
     }
 
     return (

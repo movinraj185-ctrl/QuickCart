@@ -1,4 +1,3 @@
-import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
 
@@ -8,10 +7,12 @@ const OrderSummary = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const [userAddresses, setUserAddresses] = useState([]);
+  const { userAddresses } = useAppContext();
+  const [userAddressesLocal, setUserAddressesLocal] = useState([]);
 
   const fetchUserAddresses = async () => {
-    setUserAddresses(addressDummyData);
+    // use addresses from context
+    setUserAddressesLocal(userAddresses);
   }
 
   const handleAddressSelect = (address) => {
@@ -19,13 +20,53 @@ const OrderSummary = () => {
     setIsDropdownOpen(false);
   };
 
-  const createOrder = async () => {
+  const { cartItems, products, setCartItems } = useAppContext();
 
+  const createOrder = async () => {
+    if (!selectedAddress) {
+      alert("Please select or add an address");
+      return;
+    }
+    if (Object.keys(cartItems).length === 0) {
+      alert("Cart is empty");
+      return;
+    }
+
+    const items = Object.entries(cartItems).map(([id, qty]) => {
+      const prod = products.find((p) => p._id === id);
+      return {
+        product: {
+          _id: prod._id,
+          name: prod.name,
+          price: prod.offerPrice || prod.price,
+          imageUrl: prod.image?.[0] || prod.imageUrl || "",
+        },
+        quantity: qty,
+      };
+    });
+
+    const orderData = {
+      items,
+      address: selectedAddress,
+      amount: getCartAmount(),
+    };
+
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
+    if (res.ok) {
+      setCartItems({});
+      router.push("/order-placed");
+    } else {
+      alert("Failed to place order");
+    }
   }
 
   useEffect(() => {
     fetchUserAddresses();
-  }, [])
+  }, [userAddresses])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">
@@ -57,7 +98,7 @@ const OrderSummary = () => {
 
             {isDropdownOpen && (
               <ul className="absolute w-full bg-white border shadow-md mt-1 z-10 py-1.5">
-                {userAddresses.map((address, index) => (
+                {userAddressesLocal.map((address, index) => (
                   <li
                     key={index}
                     className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer"

@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { useState } from "react";
+import { useAppContext } from "@/context/AppContext";
 
 const AddAddress = () => {
 
@@ -16,9 +17,15 @@ const AddAddress = () => {
         state: '',
     })
 
+    const { addUserAddress, router } = useAppContext();
+
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+        // simple validation
+        if (!address.fullName || !address.phoneNumber) return;
 
+        addUserAddress(address);
+        router.push('/cart');
     }
 
     return (
