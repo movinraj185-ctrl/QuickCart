@@ -4,7 +4,11 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 // initialize database connection once
-connectDB();
+try {
+  connectDB();
+} catch (e) {
+  console.error("DB initial connect failed", e);
+}
 
 export async function POST(req: Request) {
   const user = await currentUser();
